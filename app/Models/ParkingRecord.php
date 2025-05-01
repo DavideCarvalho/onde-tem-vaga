@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ParkingRecord extends Model
 {
     protected $fillable = [
+        'parking_id',
         'vehicle_id',
         'parking_spot_id',
         'entry_time',
@@ -31,5 +32,10 @@ class ParkingRecord extends Model
     public function parkingSpot(): BelongsTo
     {
         return $this->belongsTo(ParkingSpot::class);
+    }
+
+    public function parking(): BelongsTo
+    {
+        return $this->belongsTo(Parking::class);
     }
 } 
