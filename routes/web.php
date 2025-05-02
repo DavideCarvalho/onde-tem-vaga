@@ -3,6 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\Api\Dashboard\GetUsedSpotsController;
+use App\Http\Controllers\Api\Dashboard\GetEarningsController;
+use App\Http\Controllers\Api\Parking\RegisterEntryController;
+use App\Http\Controllers\Api\Parking\RegisterExitController;
+use App\Http\Controllers\Api\Parking\GetAvailableSpotsController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -16,7 +20,12 @@ Route::middleware(['auth', 'verified'])->name('web.')->group(function () {
 
 Route::middleware('auth')->name('api.')->group(function () {
     Route::get('/used-spots', GetUsedSpotsController::class)->name('used-spots');
+    Route::get('/earnings', GetEarningsController::class)->name('earnings');
+
+    Route::post('/parking/entry', RegisterEntryController::class)->name('parking.entry');
+    Route::post('/parking/exit/{record}', RegisterExitController::class)->name('parking.exit');
+    Route::get('/parking/available-spots', GetAvailableSpotsController::class)->name('parking.available-spots');
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';

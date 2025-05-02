@@ -14,4 +14,13 @@ class GetUsedSpotsData extends Data
         public readonly float $percentage,
     ) {
     }
+
+    public static function make($totalSpots, $usedSpots): self
+    {
+        return new self(
+            totalSpots: $totalSpots,
+            usedSpots: $usedSpots,
+            percentage: $usedSpots / $totalSpots * 100,
+        );
+    }
 }

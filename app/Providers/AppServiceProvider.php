@@ -24,10 +24,14 @@ class AppServiceProvider extends ServiceProvider
     {
         //
 
-        // Gate::define('viewPulse', function (User $user) {
-        //     return $user->email === 'admin@example.com';
-        // });
+        Gate::define('viewPulse', function (User $user) {
+            return $user->email === 'admin@example.com';
+        });
 
-        // Model::automaticallyEagerLoadRelationships();
+        Gate::define('viewWebTinker', function ($user = null) {
+            return $user->email === 'admin@example.com';
+        });
+
+        Model::automaticallyEagerLoadRelationships();
     }
 }
