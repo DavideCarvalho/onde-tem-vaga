@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Area, CartesianGrid, Chart, Tooltip, XAxis, YAxis } from '@/components/ui/charts';
-import { formatCurrency } from '@/lib/utils';
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { cn, formatCurrency } from '@/lib/utils';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Suspense, useRef, useState } from 'react';
@@ -31,57 +32,121 @@ function formatDate(date: string) {
     }
 }
 
+const chartConfig = {
+    value: {
+        label: 'Ganhos',
+        color: 'hsl(var(--chart-1))',
+    },
+};
+
 function DayChart({ data }: { data: { hour: number; value: number }[] }) {
     return (
-        <Chart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-                dataKey="hour"
-                tickFormatter={formatHour}
-            />
-            <YAxis tickFormatter={formatCurrency} width={80} />
-            <Tooltip
-                formatter={(value: number) => [formatCurrency(value), 'Ganhos']}
-                labelFormatter={(label: number) => formatHour(label)}
-            />
-            <Area type="monotone" dataKey="value" stroke="#8884d8" fill="#8884d8" fillOpacity={0.3} />
-        </Chart>
+        <ChartContainer config={chartConfig}>
+            <AreaChart
+                data={data}
+                margin={{ left: 12, right: 12 }}
+            >
+                <CartesianGrid vertical={false} />
+                <XAxis
+                    dataKey="hour"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    tickFormatter={formatHour}
+                />
+                <YAxis
+                    tickFormatter={formatCurrency}
+                    width={80}
+                    axisLine={false}
+                    tickLine={false}
+                />
+                <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent indicator="dot" />}
+                />
+                <Area
+                    dataKey="value"
+                    type="natural"
+                    fill="var(--color-primary)"
+                    fillOpacity={0.4}
+                    stroke="var(--color-primary)"
+                />
+            </AreaChart>
+        </ChartContainer>
     );
 }
 
 function WeekChart({ data }: { data: { day: string; value: number }[] }) {
     return (
-        <Chart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-                dataKey="day"
-                tickFormatter={formatDate}
-            />
-            <YAxis tickFormatter={formatCurrency} width={80} />
-            <Tooltip
-                formatter={(value: number) => [formatCurrency(value), 'Ganhos']}
-                labelFormatter={(label: string) => formatDate(label)}
-            />
-            <Area type="monotone" dataKey="value" stroke="#8884d8" fill="#8884d8" fillOpacity={0.3} />
-        </Chart>
+        <ChartContainer config={chartConfig}>
+            <AreaChart
+                data={data}
+                margin={{ left: 12, right: 12 }}
+            >
+                <CartesianGrid vertical={false} />
+                <XAxis
+                    dataKey="day"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    tickFormatter={formatDate}
+                />
+                <YAxis
+                    tickFormatter={formatCurrency}
+                    width={80}
+                    axisLine={false}
+                    tickLine={false}
+                />
+                <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent indicator="dot" />}
+                />
+                <Area
+                    dataKey="value"
+                    type="natural"
+                    fill="var(--color-primary)"
+                    fillOpacity={0.4}
+                    stroke="var(--color-primary)"
+                />
+            </AreaChart>
+        </ChartContainer>
     );
 }
 
 function MonthChart({ data }: { data: { day: string; value: number }[] }) {
     return (
-        <Chart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-                dataKey="day"
-                tickFormatter={formatDate}
-            />
-            <YAxis tickFormatter={formatCurrency} width={80} />
-            <Tooltip
-                formatter={(value: number) => [formatCurrency(value), 'Ganhos']}
-                labelFormatter={(label: string) => formatDate(label)}
-            />
-            <Area type="monotone" dataKey="value" stroke="#8884d8" fill="#8884d8" fillOpacity={0.3} />
-        </Chart>
+        <ChartContainer config={chartConfig}>
+            <AreaChart
+                data={data}
+                margin={{ left: 12, right: 12 }}
+            >
+                <CartesianGrid vertical={false} />
+                <XAxis
+                    dataKey="day"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    tickFormatter={formatDate}
+                />
+                <YAxis
+                    tickFormatter={formatCurrency}
+                    width={80}
+                    axisLine={false}
+                    tickLine={false}
+                />
+                <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent indicator="dot" />}
+                />
+                <Area
+                    dataKey="value"
+                    type="natural"
+                    fill="var(--color-primary)"
+                    fillOpacity={0.4}
+                    stroke="var(--color-primary)"
+                />
+            </AreaChart>
+        </ChartContainer>
     );
 }
 
@@ -100,6 +165,12 @@ function EarningsContent() {
     const dayChartData = data?.chart.day ?? [];
     const weekChartData = data?.chart.week ?? [];
     const monthChartData = data?.chart.month ?? [];
+    const currentIndex = periodsRef.current.indexOf(period);
+
+    const isChartDataEmpty =
+        (period === 'day' && dayChartData.length === 0) ||
+        (period === 'week' && weekChartData.length === 0) ||
+        (period === 'month' && monthChartData.length === 0);
 
     return (
         <div className="space-y-4">
@@ -113,11 +184,11 @@ function EarningsContent() {
                         variant="ghost"
                         size="icon"
                         onClick={() => {
-                            const currentIndex = periodsRef.current.indexOf(period);
                             if (currentIndex === 0) return;
                             const previousIndex = currentIndex - 1;
                             setPeriod(periodsRef.current[previousIndex]);
                         }}
+                        className={cn(currentIndex === 0 && 'opacity-50')}
                     >
                         <ChevronLeft className="h-4 w-4" />
                     </Button>
@@ -130,20 +201,28 @@ function EarningsContent() {
                         variant="ghost"
                         size="icon"
                         onClick={() => {
-                            const currentIndex = periodsRef.current.indexOf(period);
                             if (currentIndex === periodsRef.current.length - 1) return;
                             const nextIndex = currentIndex + 1;
                             setPeriod(periodsRef.current[nextIndex]);
                         }}
+                        className={cn(currentIndex === periodsRef.current.length - 1 && 'opacity-50')}
                     >
                         <ChevronRight className="h-4 w-4" />
                     </Button>
                 </div>
             </div>
             <div className="h-[200px]">
-                {period === 'day' && <DayChart data={dayChartData} />}
-                {period === 'week' && <WeekChart data={weekChartData} />}
-                {period === 'month' && <MonthChart data={monthChartData} />}
+                {isChartDataEmpty ? (
+                    <div className="flex items-center justify-center h-full text-muted-foreground">
+                        Sem dados para exibir o gráfico.
+                    </div>
+                ) : (
+                    <>
+                        {period === 'day' && <DayChart data={dayChartData} />}
+                        {period === 'week' && <WeekChart data={weekChartData} />}
+                        {period === 'month' && <MonthChart data={monthChartData} />}
+                    </>
+                )}
             </div>
         </div>
     );
@@ -175,9 +254,6 @@ function EarningsError() {
 export default function EarningsCard() {
     return (
         <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Ganhos</CardTitle>
-            </CardHeader>
             <CardContent>
                 <ErrorBoundary FallbackComponent={EarningsError}>
                     <Suspense fallback={<EarningsSkeleton />}>
