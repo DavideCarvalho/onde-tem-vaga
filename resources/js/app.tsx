@@ -1,4 +1,5 @@
 import '../css/app.css';
+import { Toaster } from 'react-hot-toast';
 
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
@@ -22,6 +23,7 @@ createInertiaApp({
         root.render(
             <QueryClientProvider client={queryClient}>
                 <App {...props} />
+                <Toaster />
             </QueryClientProvider>
         );
     },

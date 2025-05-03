@@ -66,4 +66,4 @@ class RegisterEntryController extends Controller
             ]);
         });
     }
-} 
+}

@@ -18,6 +18,10 @@ week: number;
 month: number;
 chart: App.Data.EarningsChartData;
 };
+export type GetPricingOptionsData = {
+value: string;
+label: string;
+};
 export type GetUsedSpotsData = {
 totalSpots: number;
 usedSpots: number;
