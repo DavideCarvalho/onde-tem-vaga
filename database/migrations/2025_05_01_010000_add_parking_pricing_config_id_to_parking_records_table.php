@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('parking_records', function (Blueprint $table) {
-            $table->foreignId('parking_pricing_config_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignUuid('parking_pricing_config_id')->nullable()->constrained()->onDelete('set null');
         });
     }
 

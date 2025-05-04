@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('parking_pricing_configs', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('parking_id')->constrained()->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->foreignUuid('parking_id')->constrained()->onDelete('cascade');
             $table->string('name'); // Avulso, Diária, Mensalista, etc
             $table->string('type'); // hourly, daily, monthly, custom
             $table->decimal('base_amount', 8, 2)->default(0);

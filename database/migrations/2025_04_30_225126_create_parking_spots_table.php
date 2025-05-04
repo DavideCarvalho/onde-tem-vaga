@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('parking_spots', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('parking_id')->constrained()->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->foreignUuid('parking_id')->constrained()->onDelete('cascade');
             $table->string('identification');
             $table->boolean('is_occupied')->default(false);
             $table->timestamps();

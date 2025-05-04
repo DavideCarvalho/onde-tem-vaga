@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('parking_records', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('parking_id')->constrained()->onDelete('cascade');
-            $table->foreignId('vehicle_id')->constrained()->onDelete('cascade');
-            $table->foreignId('parking_spot_id')->constrained()->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->foreignUuid('parking_id')->constrained()->onDelete('cascade');
+            $table->foreignUuid('vehicle_id')->constrained()->onDelete('cascade');
+            $table->foreignUuid('parking_spot_id')->constrained()->onDelete('cascade');
             $table->timestamp('entry_time');
             $table->timestamp('exit_time')->nullable();
             $table->decimal('total_amount', 8, 2)->default(0);

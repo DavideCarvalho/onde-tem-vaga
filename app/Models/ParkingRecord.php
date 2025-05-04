@@ -5,9 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class ParkingRecord extends Model
 {
+    use HasUuids;
+
     protected $fillable = [
         'parking_id',
         'vehicle_id',

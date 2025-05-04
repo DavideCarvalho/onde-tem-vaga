@@ -39,3 +39,13 @@ model: string;
 color: string;
 };
 }
+declare namespace App.Data.Parking {
+export type CalculateParkingFeeRequestData = {
+record_id: number;
+exit_time: string;
+};
+export type CalculateParkingFeeResponseData = {
+total_amount: number;
+formatted_amount: string;
+};
+}

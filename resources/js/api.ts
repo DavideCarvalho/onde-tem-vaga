@@ -35,6 +35,36 @@ export interface RegisterEntryResponse {
     };
 }
 
+export interface ParkedVehicle {
+    id: number;
+    plate: string;
+    brand: string;
+    model: string;
+    color: string;
+    entry_time: string;
+}
+
+export interface RegisterExitData {
+    record_id: string;
+    exit_time: string;
+}
+
+export interface RegisterExitResponse {
+    message: string;
+    data: {
+        id: number;
+        plate: string;
+        brand: string;
+        model: string;
+        color: string;
+        pricing_type: string;
+        entry_time: string;
+        exit_time: string;
+        total_time: string;
+        total_price: number;
+    };
+}
+
 const brasilApi = axios.create({
     baseURL: 'https://brasilapi.com.br/api',
 });
@@ -56,5 +86,22 @@ export async function fetchPricingOptions(): Promise<PricingOptionsData[]> {
 
 export async function registerEntry(data: RegisterEntryData): Promise<RegisterEntryResponse> {
     const response = await axios.post(route('api.parking.entry'), data);
+    return response.data;
+}
+
+export async function registerExit(data: RegisterExitData): Promise<RegisterExitResponse> {
+    const response = await axios.post(route('api.parking.exit'), data);
+    return response.data;
+}
+
+export async function getParkedVehicles(): Promise<ParkedVehicle[]> {
+    const response = await axios.get<ParkedVehicle[]>(route('api.parking.parked-vehicles'));
+    return response.data;
+}
+
+export async function calculateParkingFee(
+    data: App.Data.Parking.CalculateParkingFeeRequestData,
+): Promise<App.Data.Parking.CalculateParkingFeeResponseData> {
+    const response = await axios.post(route('api.parking.calculate-fee'), data);
     return response.data;
 }
