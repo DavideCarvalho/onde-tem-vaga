@@ -21,6 +21,8 @@ return new class extends Migration
             $table->decimal('additional_hour_amount', 8, 2)->nullable(); // Para cobrança por hora
             $table->decimal('daily_amount', 8, 2)->nullable(); // Para cobrança diária
             $table->decimal('monthly_amount', 8, 2)->nullable(); // Para cobrança mensal
+            $table->decimal('weekly_amount', 8, 2)->nullable(); // Para cobrança semanal
+            $table->decimal('biweekly_amount', 8, 2)->nullable(); // Para cobrança quinzenal
             $table->json('custom_rules')->nullable(); // Para regras personalizadas
             $table->boolean('is_active')->default(true);
             $table->timestamps();

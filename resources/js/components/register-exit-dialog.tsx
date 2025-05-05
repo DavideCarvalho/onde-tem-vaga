@@ -54,7 +54,7 @@ export function RegisterExitDialog() {
                 exit_time: exitTime.current.toISOString(),
             });
         },
-        enabled: !!selectedVehicle,
+        enabled: !!selectedVehicle && isOpen,
     });
 
     const form = useForm<FormData>({
@@ -70,6 +70,7 @@ export function RegisterExitDialog() {
             setIsOpen(false);
             form.reset();
             queryClient.invalidateQueries();
+            setSelectedVehicle(null);
             toast.success('Saída registrada com sucesso!');
         },
         onError: (error) => {
@@ -86,7 +87,13 @@ export function RegisterExitDialog() {
     }
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <Dialog open={isOpen} onOpenChange={(isOpen) => {
+            if (!isOpen) {
+                setSelectedVehicle(null);
+                form.reset();
+            }
+            setIsOpen(isOpen);
+        }}>
             <DialogTrigger asChild>
                 <Button variant="outline">Registrar Saída</Button>
             </DialogTrigger>
@@ -149,7 +156,7 @@ export function RegisterExitDialog() {
                                     </div>
                                 ) : feeData && (
                                     <div className="text-lg font-semibold">
-                                        Valor a pagar: R$ {feeData.data.formatted_amount}
+                                        Valor a pagar: R$ {feeData.formatted_amount}
                                     </div>
                                 )}
                             </div>

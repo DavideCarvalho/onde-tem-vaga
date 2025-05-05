@@ -45,6 +45,24 @@ class ParkingPricingConfigSeeder extends Seeder
                 'monthly_amount' => $parking->hourly_rate * 24 * 30 * 0.5, // 50% de desconto
                 'is_active' => true,
             ]);
+
+            // Configuração para Semanal
+            ParkingPricingConfig::create([
+                'parking_id' => $parking->id,
+                'name' => 'Semanal',
+                'type' => 'weekly',
+                'weekly_amount' => $parking->hourly_rate * 24 * 7 * 0.6, // 40% de desconto
+                'is_active' => true,
+            ]);
+
+            // Configuração para Quinzenal
+            ParkingPricingConfig::create([
+                'parking_id' => $parking->id,
+                'name' => 'Quinzenal',
+                'type' => 'biweekly',
+                'biweekly_amount' => $parking->hourly_rate * 24 * 15 * 0.55, // 45% de desconto
+                'is_active' => true,
+            ]);
         }
     }
 }

@@ -24,13 +24,14 @@ class CalculateParkingFeeController extends Controller
             ], 400);
         }
 
-        $totalAmount = $record->calculateTotalAmount($data->exit_time);
+        $totalAmountData = $record->calculateTotalAmount($data->exit_time);
 
         $response = CalculateParkingFeeResponseData::make(
-            $totalAmount,
-            number_format($totalAmount, 2, ',', '.')
+            $totalAmountData['amount'],
+            number_format($totalAmountData['amount'], 2, ',', '.'),
+            $totalAmountData['already_paid']
         );
 
-        return response()->json(['data' => $response]);
+        return response()->json($response);
     }
 }

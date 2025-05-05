@@ -44,6 +44,7 @@ class ParkingRecordSeeder extends Seeder
             }
 
             // Criar alguns registros com saída para testar o cálculo de valores
+            /** @var Collection<ParkingSpot> $spots */
             $spots = $parking->parkingSpots()->skip(3)->take(2)->get();
             foreach ($spots as $spot) {
                 $vehicle = $vehicles->random();
@@ -51,6 +52,7 @@ class ParkingRecordSeeder extends Seeder
                 $entryTime = Carbon::now()->subHours(rand(1, 5));
                 $exitTime = $entryTime->copy()->addHours(rand(1, 24));
 
+                /** @var ParkingRecord $record */
                 $record = ParkingRecord::create([
                     'parking_id' => $parking->id,
                     'vehicle_id' => $vehicle->id,
@@ -63,8 +65,9 @@ class ParkingRecordSeeder extends Seeder
                 ]);
 
                 // Calcular e atualizar o valor total
+                $amountResult = $record->calculateTotalAmount();
                 $record->update([
-                    'total_amount' => $record->calculateTotalAmount(),
+                    'total_amount' => is_array($amountResult) ? $amountResult['amount'] : $amountResult,
                 ]);
             }
         }

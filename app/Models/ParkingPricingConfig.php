@@ -21,6 +21,8 @@ class ParkingPricingConfig extends Model
         'monthly_amount',
         'custom_rules',
         'is_active',
+        'weekly_amount',
+        'biweekly_amount',
     ];
 
     protected $casts = [
@@ -30,6 +32,8 @@ class ParkingPricingConfig extends Model
         'monthly_amount' => 'decimal:2',
         'custom_rules' => 'array',
         'is_active' => 'boolean',
+        'weekly_amount' => 'decimal:2',
+        'biweekly_amount' => 'decimal:2',
     ];
 
     public function parking(): BelongsTo

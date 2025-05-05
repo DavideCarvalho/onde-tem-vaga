@@ -90,7 +90,9 @@ export async function registerEntry(data: RegisterEntryData): Promise<RegisterEn
 }
 
 export async function registerExit(data: RegisterExitData): Promise<RegisterExitResponse> {
-    const response = await axios.post(route('api.parking.exit'), data);
+    const response = await axios.post(route('api.parking.exit', {
+        record: data.record_id,
+    }), data);
     return response.data;
 }
 
