@@ -10,13 +10,16 @@ use App\Http\Controllers\Api\Parking\RegisterExitController;
 use App\Http\Controllers\Api\Parking\GetAvailableSpotsController;
 use App\Http\Controllers\Api\Parking\GetParkedVehiclesController;
 use App\Http\Controllers\Api\Parking\CalculateParkingFeeController;
+use App\Http\Controllers\Api\Parking\GetNearbyParkingsController;
+use Illuminate\Support\Facades\Http;
+use App\Http\Controllers\Api\UserLocationController;
 
 Route::get('/', function () {
-    return Inertia::render('welcome');
+    return Inertia::render('find-parkings');
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->name('web.')->group(function () {
-    Route::get('dashboard', function () {
+    Route::get('/estacionamento/dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 });
@@ -32,6 +35,10 @@ Route::middleware('auth')->name('api.')->group(function () {
     Route::get('/parking/available-spots', GetAvailableSpotsController::class)->name('parking.available-spots');
     Route::post('/parking/calculate-fee', CalculateParkingFeeController::class)->name('parking.calculate-fee');
 });
+
+Route::get('/api/parking/nearby', GetNearbyParkingsController::class)->name('api.parking.nearby');
+
+Route::get('/api/user-location', UserLocationController::class);
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

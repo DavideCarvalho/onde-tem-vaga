@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'ip2location' => [
+        'key' => env('IP2LOCATION_API_KEY'),
+    ],
+
 ];
