@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Head } from '@inertiajs/react';
 import { useQuery } from '@tanstack/react-query';
 import { useDebounce } from '@uidotdev/usehooks';
-import { getNearbyParkings, geocodeAddress, fetchPhotonSuggestions } from '../api';
+import { getNearbyParkings, geocodeAddress, fetchPhotonSuggestions, getUserLocationByIp, getPublicIp } from '../api';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,6 +16,39 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 type Coords = { lat: number; lon: number } | null;
+
+// Componente para sugestões de endereço
+interface AddressSuggestionsProps {
+    suggestions: PhotonSuggestion[];
+    visible: boolean;
+    onSelect: (s: PhotonSuggestion) => void;
+}
+function AddressSuggestions({
+    suggestions,
+    visible,
+    onSelect,
+}: AddressSuggestionsProps) {
+    if (!visible || suggestions.length === 0) return null;
+    return (
+        <ul className="absolute left-0 right-0 mt-2 bg-white dark:bg-[#232323] border border-gray-200 dark:border-[#232323] z-20 max-h-56 overflow-y-auto rounded-lg shadow-lg animate-fade-in">
+            {suggestions.map((s: PhotonSuggestion) => (
+                <li key={`${s.label}-${s.lat}-${s.lon}`} className="p-0 m-0 border-none bg-transparent">
+                    <button
+                        type="button"
+                        className="w-full text-left p-3 hover:bg-[#f53003]/10 dark:hover:bg-[#f53003]/20 transition-colors text-[#1b1b18] dark:text-white"
+                        onMouseDown={() => onSelect(s)}
+                        onKeyDown={e => {
+                            if (e.key === 'Enter' || e.key === ' ') onSelect(s);
+                        }}
+                    >
+                        <span className="font-medium">{s.name}</span>
+                        <span className="block text-xs text-gray-500 dark:text-gray-400">{s.label.replace(s.name + ',', '').trim()}</span>
+                    </button>
+                </li>
+            ))}
+        </ul>
+    );
+}
 
 export default function FindParking() {
     const [geoError, setGeoError] = useState<string | null>(null);
@@ -89,19 +122,26 @@ export default function FindParking() {
         }
     }, [debouncedAddress, coords, coordsError]);
 
-    // Busca localização por IP ao montar
-    useEffect(() => {
-        fetch('/api/user-location')
-            .then(res => res.json())
-            .then(data => {
-                if (data.lat && data.lon) setAutoCoords({ lat: data.lat, lon: data.lon });
-            });
-    }, []);
+    // Query para buscar o IP público do usuário
+    const { data: publicIpData } = useQuery({
+        queryKey: ['public-ip'],
+        queryFn: getPublicIp,
+    });
 
-    // Use autoCoords se não tiver endereço digitado ou coords selecionado
+    const { data: userLocationData } = useQuery({
+        queryKey: ['user-location', publicIpData?.ip],
+        queryFn: () => publicIpData?.ip ? getUserLocationByIp(publicIpData.ip) : Promise.resolve(null),
+        enabled: !!publicIpData?.ip,
+    });
+
+    useEffect(() => {
+        if (userLocationData && userLocationData.lat && userLocationData.lon) {
+            setAutoCoords({ lat: userLocationData.lat, lon: userLocationData.lon });
+        }
+    }, [userLocationData]);
+
     const coordsToUse = selectedCoords || autoCoords;
 
-    // Query para estacionamentos próximos
     const { data: results = [], isFetching } = useQuery({
         queryKey: ['nearby-parkings', coordsToUse],
         queryFn: () => coordsToUse && typeof coordsToUse.lat === 'number' && typeof coordsToUse.lon === 'number'
@@ -133,25 +173,11 @@ export default function FindParking() {
                                 onFocus={() => { setShowSuggestions(true); setIsInputFocused(true); }}
                                 onBlur={() => { setShowSuggestions(false); setIsInputFocused(false); }}
                             />
-                            {isInputFocused && showSuggestions && suggestions.length > 0 && (
-                                <ul className="absolute left-0 right-0 mt-2 bg-white dark:bg-[#232323] border border-gray-200 dark:border-[#232323] z-20 max-h-56 overflow-y-auto rounded-lg shadow-lg animate-fade-in">
-                                    {suggestions.map(s => (
-                                        <li key={`${s.label}-${s.lat}-${s.lon}`} className="p-0 m-0 border-none bg-transparent">
-                                            <button
-                                                type="button"
-                                                className="w-full text-left p-3 hover:bg-[#f53003]/10 dark:hover:bg-[#f53003]/20 transition-colors text-[#1b1b18] dark:text-white"
-                                                onMouseDown={() => handleSelectSuggestion(s)}
-                                                onKeyDown={e => {
-                                                    if (e.key === 'Enter' || e.key === ' ') handleSelectSuggestion(s);
-                                                }}
-                                            >
-                                                <span className="font-medium">{s.name}</span>
-                                                <span className="block text-xs text-gray-500 dark:text-gray-400">{s.label.replace(s.name + ',', '').trim()}</span>
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
+                            <AddressSuggestions
+                                suggestions={suggestions}
+                                visible={isInputFocused && showSuggestions}
+                                onSelect={handleSelectSuggestion}
+                            />
                         </div>
                         {errors.address && (
                             <span className="text-sm text-red-500 mt-1">{errors.address.message}</span>
@@ -176,17 +202,31 @@ export default function FindParking() {
                                 <MapPin className="h-5 w-5 text-[#f53003]" /> Estacionamentos próximos
                             </h2>
                             <ul className="flex flex-col gap-3">
-                                {results.map(est => (
-                                    <li key={est.id} className="rounded-xl border border-gray-200 dark:border-[#232323] bg-white dark:bg-[#232323] p-4 shadow flex flex-col gap-1 transition hover:shadow-lg">
-                                        <span className="font-bold text-[#1b1b18] dark:text-white text-base flex items-center gap-2">
-                                            <Building2 className="h-5 w-5 text-[#f53003]" /> {est.name}
-                                        </span>
-                                        <span className="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-1">
-                                            <MapPin className="h-4 w-4 text-gray-400" /> {est.address}
-                                        </span>
-                                        <span className="text-xs text-gray-500 dark:text-gray-400">{est.distance} de distância</span>
-                                    </li>
-                                ))}
+                                {results.map(est => {
+                                    const occupancyPercentage = est.occupancy_percentage;
+                                    let colorClass = '';
+                                    if (occupancyPercentage >= 50) {
+                                        colorClass = 'text-green-500';
+                                    } else if (occupancyPercentage >= 20) {
+                                        colorClass = 'text-yellow-500';
+                                    } else {
+                                        colorClass = 'text-red-500';
+                                    }
+                                    return (
+                                        <li key={est.id} className="rounded-xl border border-gray-200 dark:border-[#232323] bg-white dark:bg-[#232323] p-4 shadow flex flex-col gap-1 transition hover:shadow-lg">
+                                            <span className="font-bold text-[#1b1b18] dark:text-white text-base flex items-center gap-2">
+                                                <Building2 className="h-5 w-5 text-[#f53003]" /> {est.name}
+                                            </span>
+                                            <span className="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-1">
+                                                <MapPin className="h-4 w-4 text-gray-400" /> {est.address}
+                                            </span>
+                                            <span className="text-xs text-gray-500 dark:text-gray-400">{est.distance} de distância</span>
+                                            <span className={`text-sm ${colorClass}`}>
+                                                Vagas disponíveis: {est.available_spaces} ({occupancyPercentage}% ocupado)
+                                            </span>
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         </div>
                     )}

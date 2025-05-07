@@ -38,12 +38,20 @@ class GetNearbyParkingsController extends Controller
             ->orderBy('distance')
             ->limit(20)
             ->get()
-            ->map(fn($parking) => GetNearbyParkingResponseData::make(
-                (string) $parking->id,
-                $parking->name,
-                $parking->address,
-                round($parking->distance) . 'm',
-            ));
+            ->map(function ($parking) {
+                $totalSpaces = $parking->parkingSpots()->count();
+                $occupiedSpaces = $parking->parkingSpots()->whereHas('parkingRecords', function ($query) {
+                    $query->whereNull('exit_time');
+                })->count();
+                return GetNearbyParkingResponseData::make(
+                    (string) $parking->id,
+                    $parking->name,
+                    $parking->address,
+                    round($parking->distance) . 'm',
+                    $totalSpaces - $occupiedSpaces,
+                    $totalSpaces > 0 ? round(($occupiedSpaces / $totalSpaces) * 100, 2) : 0
+                );
+            });
 
         return response()->json($parkings);
     }

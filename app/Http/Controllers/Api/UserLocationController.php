@@ -12,7 +12,7 @@ class UserLocationController extends Controller
 {
   public function __invoke(Request $request): JsonResponse
   {
-    $ip = $request->ip();
+    $ip = $request->query('ip', $request->ip());
     $apiKey = config('services.ip2location.key');
     $response = Http::get('https://api.ip2location.io/', [
       'key' => $apiKey,

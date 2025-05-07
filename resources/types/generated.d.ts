@@ -33,6 +33,13 @@ identification: string;
 entry_time: string | null;
 vehicle: App.Data.VehicleData | null;
 };
+export type UserLocationResponseData = {
+lat: number | null;
+lon: number | null;
+city: string | null;
+state: string | null;
+country: string | null;
+};
 export type VehicleData = {
 plate: string;
 model: string;
@@ -48,6 +55,14 @@ export type CalculateParkingFeeResponseData = {
 total_amount: number;
 formatted_amount: string;
 already_paid: boolean;
+};
+export type GetNearbyParkingResponseData = {
+id: string;
+name: string;
+address: string;
+distance: string;
+available_spaces: number;
+occupancy_percentage: number;
 };
 export type GetParkedVehicleResponseData = {
 id: string;

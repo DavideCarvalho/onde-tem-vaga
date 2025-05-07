@@ -35,15 +35,6 @@ export interface RegisterEntryResponse {
     };
 }
 
-export interface ParkedVehicle {
-    id: number;
-    plate: string;
-    brand: string;
-    model: string;
-    color: string;
-    entry_time: string;
-}
-
 export interface RegisterExitData {
     record_id: string;
     exit_time: string;
@@ -70,6 +61,8 @@ export interface NearbyParking {
     name: string;
     distance: string;
     address: string;
+    available_spaces: number;
+    occupancy_percentage: number;
 }
 
 export interface PhotonSuggestion {
@@ -80,6 +73,14 @@ export interface PhotonSuggestion {
     lat: number;
     lon: number;
     label: string;
+}
+
+export interface UserLocationResponseData {
+    lat: number | null;
+    lon: number | null;
+    city: string | null;
+    state: string | null;
+    country: string | null;
 }
 
 const brasilApi = axios.create({
@@ -113,8 +114,8 @@ export async function registerExit(data: RegisterExitData): Promise<RegisterExit
     return response.data;
 }
 
-export async function getParkedVehicles(): Promise<ParkedVehicle[]> {
-    const response = await axios.get<ParkedVehicle[]>(route('api.parking.parked-vehicles'));
+export async function getParkedVehicles(): Promise<App.Data.Parking.GetParkedVehicleResponseData[]> {
+    const response = await axios.get<App.Data.Parking.GetParkedVehicleResponseData[]>(route('api.parking.parked-vehicles'));
     return response.data;
 }
 
@@ -139,7 +140,7 @@ export async function geocodeAddress(address: string): Promise<{ lat: number, lo
     return null;
 }
 
-export async function getNearbyParkings(lat: number, lng: number): Promise<NearbyParking[]> {
+export async function getNearbyParkings(lat: number, lng: number): Promise<App.Data.Parking.GetNearbyParkingResponseData[]> {
     if (!lat || !lng) return [];
     const response = await axios.get(route('api.parking.nearby'), {
         params: { lat, lng },
@@ -175,4 +176,18 @@ export async function fetchPhotonSuggestions(query: string): Promise<PhotonSugge
             f.properties.country
         ].filter(Boolean).join(', ')
     }));
+}
+
+export async function getUserLocationByIp(ip: string): Promise<App.Data.UserLocationResponseData> {
+    const res = await fetch(`/api/user-location?ip=${ip}`);
+    return (await res.json()) as App.Data.UserLocationResponseData;
+}
+
+interface PublicIpResponse {
+    ip: string;
+}
+
+export async function getPublicIp(): Promise<PublicIpResponse> {
+    const res = await fetch('https://api.ipify.org?format=json');
+    return (await res.json()) as PublicIpResponse;
 }
