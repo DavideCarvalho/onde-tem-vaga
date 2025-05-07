@@ -12,6 +12,7 @@
         "php": "^8.2",
         "clickbar/laravel-magellan": "^2.0",
         "inertiajs/inertia-laravel": "^2.0",
+        "inspector-apm/inspector-laravel": "^4.11",
         "laravel/framework": "^12.0",
         "laravel/horizon": "^5.31",
         "laravel/pulse": "^1.4",

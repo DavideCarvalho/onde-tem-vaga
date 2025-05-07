@@ -19,7 +19,6 @@ class UserLocationController extends Controller
       'ip' => $ip,
       'format' => 'json',
     ]);
-    dd($response->json());
     if ($response->successful()) {
       $data = $response->json();
       return response()->json(UserLocationResponseData::make(

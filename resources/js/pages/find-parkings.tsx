@@ -22,6 +22,8 @@ export default function FindParking() {
     const [autoCoords, setAutoCoords] = useState<Coords>(null);
     const [suggestions, setSuggestions] = useState<PhotonSuggestion[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
+    const [justSelectedSuggestion, setJustSelectedSuggestion] = useState(false);
+    const [isInputFocused, setIsInputFocused] = useState(false);
 
     const { register, watch, formState: { errors }, setValue } = useForm<FormData>({
         resolver: zodResolver(schema),
@@ -44,6 +46,10 @@ export default function FindParking() {
 
     // Buscar sugestões do Photon
     useEffect(() => {
+        if (justSelectedSuggestion) {
+            setJustSelectedSuggestion(false);
+            return;
+        }
         if (debouncedAddress) {
             fetchPhotonSuggestions(debouncedAddress).then(setSuggestions);
             setShowSuggestions(true);
@@ -59,6 +65,7 @@ export default function FindParking() {
         setSuggestions([]);
         setValue('address', s.label, { shouldValidate: true });
         setSelectedCoords({ lat: s.lat, lon: s.lon });
+        setJustSelectedSuggestion(true);
     }
 
     // Permitir sobrescrever coords manualmente
@@ -123,16 +130,17 @@ export default function FindParking() {
                                 {...register('address')}
                                 required
                                 autoComplete="off"
-                                onFocus={() => setShowSuggestions(true)}
+                                onFocus={() => { setShowSuggestions(true); setIsInputFocused(true); }}
+                                onBlur={() => { setShowSuggestions(false); setIsInputFocused(false); }}
                             />
-                            {showSuggestions && suggestions.length > 0 && (
+                            {isInputFocused && showSuggestions && suggestions.length > 0 && (
                                 <ul className="absolute left-0 right-0 mt-2 bg-white dark:bg-[#232323] border border-gray-200 dark:border-[#232323] z-20 max-h-56 overflow-y-auto rounded-lg shadow-lg animate-fade-in">
                                     {suggestions.map(s => (
                                         <li key={`${s.label}-${s.lat}-${s.lon}`} className="p-0 m-0 border-none bg-transparent">
                                             <button
                                                 type="button"
                                                 className="w-full text-left p-3 hover:bg-[#f53003]/10 dark:hover:bg-[#f53003]/20 transition-colors text-[#1b1b18] dark:text-white"
-                                                onClick={() => handleSelectSuggestion(s)}
+                                                onMouseDown={() => handleSelectSuggestion(s)}
                                                 onKeyDown={e => {
                                                     if (e.key === 'Enter' || e.key === ' ') handleSelectSuggestion(s);
                                                 }}
